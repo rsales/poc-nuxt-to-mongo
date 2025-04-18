@@ -7,7 +7,31 @@ export default defineEventHandler(async (event) => {
 
   // Verify the HTTP method
   if (event.node.req.method === "GET") {
+    const query = getQuery(event);
+    
     // Returny all users
+
+    // If the query has an id, return the user with that id
+    if (query.id) {
+      try {
+        const user = await User.findById(query.id);
+        if (!user) {
+          throw createError({
+            statusCode: 404,
+            statusMessage: "User not found",
+          });
+        }
+        return user;
+      } catch (error) {
+        throw createError({
+          statusCode: 500,
+          statusMessage: "Failed to fetch user",
+          data: error,
+        });
+      }
+    }
+
+    // Else, return all users
     try {
       const users = await User.find();
       return users;
